@@ -4,9 +4,23 @@
 
 Keep your Claude Code skills lean. Detect overlaps, audit bloat, prevent prompt pollution.
 
-## Problem
+## Why does having too many skills hurt accuracy?
 
-Every installed skill and enabled plugin adds to your system prompt. At 50+ skills, the model struggles to pick the right one — like a restaurant with a 20-page menu.
+Every skill you install injects its name and description into the system prompt. Before responding to you, the model scans **all** skill descriptions to decide: *"Should I invoke one of these?"*
+
+With 10 skills, this is fast and precise. With 60+, three things break down:
+
+1. **Selection confusion** — Two skills with similar descriptions (e.g., `film-storyboard-skill` and `storyboard-creation` both mention "storyboard + visual prompts") force the model to guess which one you meant. Sometimes it picks the wrong one, sometimes it hesitates and picks neither.
+
+2. **Context budget eaten** — Each skill description costs tokens. 60 skills can consume 6,000+ tokens of your context window before you even type your first message. That's space that could hold your actual code or conversation history.
+
+3. **Invisible misfires** — The model might silently invoke a tangentially related skill instead of answering directly. You won't know why the response feels off.
+
+**A real example from my own setup:**
+
+I had 64 skills loaded. When I said "help me create a storyboard", Claude had to choose between `film-storyboard-skill`, `storyboard-creation`, and `storyboard-review-skill` — all with overlapping descriptions. After running an audit, I archived the redundant one and moved 33 domain-specific skills to project-level. Selection accuracy improved immediately, and my context window got 4,000+ tokens back.
+
+## What this skill does
 
 This skill gives you:
 
