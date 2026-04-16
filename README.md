@@ -31,25 +31,32 @@ This skill gives you:
 
 ## Install
 
-**Option A — Copy as a personal skill:**
+**Recommended — Install as a personal skill:**
 
 ```bash
 git clone https://github.com/belalee-ai/skill-hygiene.git
 cp -r skill-hygiene/.claude ~/.claude
 ```
 
-**Option B — Use as a plugin (test locally):**
+This copies the skill into `~/.claude/skills/skill-hygiene/`, which is the standard Claude Code personal skill location. It will be available in all your projects immediately.
+
+<details>
+<summary>Other install methods</summary>
+
+**Test as a plugin (try before installing):**
 
 ```bash
 git clone https://github.com/belalee-ai/skill-hygiene.git
 claude --plugin-dir ./skill-hygiene
 ```
 
-**Option C — Third-party CLI (if you use `npx skills`):**
+**Third-party CLI (if you use `npx skills`):**
 
 ```bash
 npx skills add belalee-ai/skill-hygiene
 ```
+
+</details>
 
 ## Usage
 

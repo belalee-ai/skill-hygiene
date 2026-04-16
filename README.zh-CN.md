@@ -29,25 +29,32 @@
 
 ## 安装
 
-**方式一 — 手动复制为个人 skill：**
+**推荐 — 安装为个人 skill：**
 
 ```bash
 git clone https://github.com/belalee-ai/skill-hygiene.git
 cp -r skill-hygiene/.claude ~/.claude
 ```
 
-**方式二 — 作为插件本地测试：**
+这会将 skill 复制到 `~/.claude/skills/skill-hygiene/`，这是 Claude Code 标准的个人 skill 路径。安装后所有项目立刻可用。
+
+<details>
+<summary>其他安装方式</summary>
+
+**先试后装（作为插件本地测试）：**
 
 ```bash
 git clone https://github.com/belalee-ai/skill-hygiene.git
 claude --plugin-dir ./skill-hygiene
 ```
 
-**方式三 — 第三方 CLI（如果你使用 `npx skills`）：**
+**第三方 CLI（如果你使用 `npx skills`）：**
 
 ```bash
 npx skills add belalee-ai/skill-hygiene
 ```
+
+</details>
 
 ## 使用方法
 
