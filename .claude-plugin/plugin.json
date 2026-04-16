@@ -1,0 +1,8 @@
+{
+  "name": "skill-hygiene",
+  "version": "1.0.0",
+  "description": "Audit and manage Claude Code skills — detect overlaps, prevent prompt bloat, track health",
+  "author": "belalee-ai",
+  "license": "MIT",
+  "keywords": ["skills", "audit", "hygiene", "overlap", "management", "cleanup"]
+}
