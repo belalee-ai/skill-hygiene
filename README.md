@@ -1,73 +1,82 @@
 # skill-hygiene
 
-[中文版 README](README.zh-CN.md)
+> [中文版](README.zh-CN.md)
 
 Keep your Claude Code skills lean. Detect overlaps, audit bloat, prevent prompt pollution.
 
-## Why does having too many skills hurt accuracy?
+## Why It Matters
 
-Every skill you install injects its name and description into the system prompt. Before responding to you, the model scans **all** skill descriptions to decide: *"Should I invoke one of these?"*
+Every installed skill injects its description into the system prompt. The model scans **all** of them before every response to decide which to invoke.
 
-With 10 skills, this is fast and precise. With 60+, three things break down:
+With 10 skills, this is fast and precise. With 60+, three things break:
 
-1. **Selection confusion** — Two skills with similar descriptions (e.g., `film-storyboard-skill` and `storyboard-creation` both mention "storyboard + visual prompts") force the model to guess which one you meant. Sometimes it picks the wrong one, sometimes it hesitates and picks neither.
+1. **Selection confusion** — Similar descriptions force the model to guess. Sometimes it picks wrong, sometimes it picks neither.
+2. **Context budget eaten** — 60 skills can consume 6,000+ tokens before you type your first message.
+3. **Silent misfires** — The model invokes a tangentially related skill instead of answering directly. You just feel the response is "off".
 
-2. **Context budget eaten** — Each skill description costs tokens. 60 skills can consume 6,000+ tokens of your context window before you even type your first message. That's space that could hold your actual code or conversation history.
+This skill gives you the tools to keep things clean: **duplicate detection** before installs, **full audits** with overlap analysis, **health warnings** for bloated skills, and **soft archiving** instead of permanent deletion.
 
-3. **Invisible misfires** — The model might silently invoke a tangentially related skill instead of answering directly. You won't know why the response feels off.
+## Installation
 
-**A real example from my own setup:**
+### Method 1: Skills CLI (Recommended)
 
-I had 64 skills loaded. When I said "help me create a storyboard", Claude had to choose between `film-storyboard-skill`, `storyboard-creation`, and `storyboard-review-skill` — all with overlapping descriptions. After running an audit, I archived the redundant one and moved 33 domain-specific skills to project-level. Selection accuracy improved immediately, and my context window got 4,000+ tokens back.
+```bash
+npx skills add belalee-ai/skill-hygiene
+```
 
-## What this skill does
+### Method 2: Claude Code Plugin
 
-This skill gives you:
+```bash
+/plugin marketplace add belalee-ai/skill-hygiene
+/plugin install skill-hygiene
+```
 
-- **Duplicate detection** before installing new skills
-- **Full audit** of all installed skills with overlap analysis
-- **Health warnings** for oversized skills and missing descriptions
-- **Hook integration** to auto-check before skill installs
+### Method 3: Ask Your Agent
 
-## Install
+Just tell Claude Code:
 
-**Recommended — Install as a personal skill:**
+> Install the skill-hygiene skill from https://github.com/belalee-ai/skill-hygiene
+
+Claude will handle cloning and setup automatically.
+
+### Method 4: Manual Clone
 
 ```bash
 git clone https://github.com/belalee-ai/skill-hygiene.git
 cp -r skill-hygiene/.claude ~/.claude
 ```
 
-This copies the skill into `~/.claude/skills/skill-hygiene/`, which is the standard Claude Code personal skill location. It will be available in all your projects immediately.
+This copies the skill into `~/.claude/skills/skill-hygiene/` (standard personal skill location), available in all projects immediately.
 
 <details>
-<summary>Other install methods</summary>
-
-**Test as a plugin (try before installing):**
+<summary>Try before installing (local plugin mode)</summary>
 
 ```bash
 git clone https://github.com/belalee-ai/skill-hygiene.git
 claude --plugin-dir ./skill-hygiene
 ```
 
-**Third-party CLI (if you use `npx skills`):**
-
-```bash
-npx skills add belalee-ai/skill-hygiene
-```
-
 </details>
+
+### Verify Installation
+
+```
+~/.claude/skills/skill-hygiene/
+├── SKILL.md                    ← Core instruction file (must exist)
+└── scripts/
+    └── skill-audit.sh          ← Audit engine (bash 3+, no dependencies)
+```
 
 ## Usage
 
-### Pre-install check
+### Pre-Install Duplicate Check
 
-Before installing a new skill, check for duplicates:
+Before installing a new skill, check for overlaps:
 
 ```
 > I want to install a storyboard skill
 
-Claude will automatically run the duplicate check and show:
+Claude automatically runs the check:
 
 === Duplicate Check: new-storyboard ===
 
@@ -78,9 +87,9 @@ Claude will automatically run the duplicate check and show:
   Review overlapping skills before installing.
 ```
 
-### Full audit
+### Full Audit
 
-Tell Claude "run a skill audit" or invoke `/skill-hygiene audit`. Output:
+Say "run a skill audit" or invoke `/skill-hygiene audit`:
 
 ```
 ========================================
@@ -90,7 +99,6 @@ Tell Claude "run a skill audit" or invoke `/skill-hygiene audit`. Output:
 [1] Installed Custom Skills
   [animator-skill]    225L    52K   4 files
   [web-access]        246L    76K  10 files
-  ...
   Total: 12 custom skills
 
 [2] Overlap Analysis
@@ -98,9 +106,6 @@ Tell Claude "run a skill audit" or invoke `/skill-hygiene audit`. Output:
     Shared: boards, convert, platform, prompt, sequence
 
 [3] Enabled Plugins
-  - superpowers@claude-plugins-official
-  - vercel@claude-plugins-official
-  ...
   Estimated total skills in prompt: ~92
   > 50 skills — high risk of selection confusion. Audit and trim.
 
@@ -109,15 +114,15 @@ Tell Claude "run a skill audit" or invoke `/skill-hygiene audit`. Output:
   [ppt-generator] missing description — hurts tool selection
 ```
 
-### Archive (soft delete)
+### Archive (Soft Delete)
 
 ```bash
 mv ~/.claude/skills/old-skill ~/.claude/skills/.archived-old-skill
 ```
 
-Archived skills show up in the audit report and can be restored anytime.
+Archived skills appear in the audit report and can be restored anytime.
 
-## Thresholds
+## Health Thresholds
 
 | Metric | Green | Yellow | Red |
 |--------|-------|--------|-----|
@@ -126,21 +131,27 @@ Archived skills show up in the audit report and can be restored anytime.
 | Skill directory size | < 5 MB | 5–10 MB | > 10 MB |
 | Files per skill | < 20 | 20–50 | > 50 |
 
-## How it works
+## How It Works
 
-The audit script extracts keywords from each skill's `description` field in SKILL.md, then compares them pairwise:
+The audit script extracts keywords from each skill's `description` field in SKILL.md, then compares pairwise:
 
 1. Extract English words (3+ chars) from description
 2. Remove stopwords (common English + Claude ecosystem terms like "skill", "agent", "tool")
-3. Two-pass stemming: strip plurals first (-s, -ies, -ves), then derivational suffixes (-ation, -ing, -ment, -ed)
-4. Compare keyword sets between all skill pairs using `comm -12`
-5. Report overlap percentage (shared keywords / smaller set size)
+3. Two-pass stemming: strip plurals (-s, -ies, -ves), then derivational suffixes (-ation, -ing, -ment, -ed)
+4. Compare keyword sets using `comm -12`
+5. Report overlap % = shared keywords / smaller set size
 
 Pure bash, compatible with macOS (bash 3) and Linux (bash 4+). No external dependencies.
 
-## Hook setup (optional)
+## Strategy Tips
 
-Add to `~/.claude/settings.json` to auto-remind before skill installs:
+- **Global plugins** — Only keep skills used in every project (workflow, debugging)
+- **Project-level plugins** — Move domain plugins to `.claude/settings.json` in specific repos
+- **Pipeline skills** — Skills forming a pipeline (scriptwriter → storyboard → animator) may share keywords but have different roles — don't merge blindly
+
+## Hook Integration (Optional)
+
+Auto-remind before skill installs. Add to `~/.claude/settings.json`:
 
 ```json
 {
@@ -159,12 +170,6 @@ Add to `~/.claude/settings.json` to auto-remind before skill installs:
   }
 }
 ```
-
-## Strategy tips
-
-- **Global plugins**: Only keep skills you use in every project (workflow, debugging)
-- **Project-level plugins**: Move domain plugins (Vercel, Figma) to `.claude/settings.json` or `.claude/settings.local.json` in specific repos
-- **Pipeline skills**: Skills that form a pipeline (scriptwriter → storyboard → animator) may share keywords but have different roles — don't merge them blindly
 
 ## License
 
