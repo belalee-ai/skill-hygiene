@@ -1,5 +1,7 @@
 # skill-hygiene
 
+[中文版 README](README.zh-CN.md)
+
 Keep your Claude Code skills lean. Detect overlaps, audit bloat, prevent prompt pollution.
 
 ## Problem
