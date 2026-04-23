@@ -1,5 +1,9 @@
 # skill-hygiene
 
+> **⚠️ This skill has moved to [bela-tools](https://github.com/belalee-ai/bela-tools).** Install from there for the latest version.
+
+---
+
 > [中文版](README.zh-CN.md)
 
 Keep your Claude Code skills lean. Detect overlaps, audit bloat, prevent prompt pollution.
@@ -18,53 +22,17 @@ This skill gives you the tools to keep things clean: **duplicate detection** bef
 
 ## Installation
 
-### Method 1: Skills CLI (Recommended)
+Install via [bela-tools](https://github.com/belalee-ai/bela-tools) (recommended):
 
 ```bash
-npx skills add belalee-ai/skill-hygiene
+git clone https://github.com/belalee-ai/bela-tools.git ~/.claude/plugins/bela-tools
 ```
 
-### Method 2: Claude Code Plugin
-
-```bash
-/plugin marketplace add belalee-ai/skill-hygiene
-/plugin install skill-hygiene
-```
-
-### Method 3: Ask Your Agent
-
-Just tell Claude Code:
-
-> Install the skill-hygiene skill from https://github.com/belalee-ai/skill-hygiene
-
-Claude will handle cloning and setup automatically.
-
-### Method 4: Manual Clone
+### Legacy installation (this repo)
 
 ```bash
 git clone https://github.com/belalee-ai/skill-hygiene.git
 cp -r skill-hygiene/.claude ~/.claude
-```
-
-This copies the skill into `~/.claude/skills/skill-hygiene/` (standard personal skill location), available in all projects immediately.
-
-<details>
-<summary>Try before installing (local plugin mode)</summary>
-
-```bash
-git clone https://github.com/belalee-ai/skill-hygiene.git
-claude --plugin-dir ./skill-hygiene
-```
-
-</details>
-
-### Verify Installation
-
-```
-~/.claude/skills/skill-hygiene/
-├── SKILL.md                    ← Core instruction file (must exist)
-└── scripts/
-    └── skill-audit.sh          ← Audit engine (bash 3+, no dependencies)
 ```
 
 ## Usage
@@ -130,46 +98,6 @@ Archived skills appear in the audit report and can be restored anytime.
 | Keyword overlap between two skills | < 40% | 40–69% | >= 70% |
 | Skill directory size | < 5 MB | 5–10 MB | > 10 MB |
 | Files per skill | < 20 | 20–50 | > 50 |
-
-## How It Works
-
-The audit script extracts keywords from each skill's `description` field in SKILL.md, then compares pairwise:
-
-1. Extract English words (3+ chars) from description
-2. Remove stopwords (common English + Claude ecosystem terms like "skill", "agent", "tool")
-3. Two-pass stemming: strip plurals (-s, -ies, -ves), then derivational suffixes (-ation, -ing, -ment, -ed)
-4. Compare keyword sets using `comm -12`
-5. Report overlap % = shared keywords / smaller set size
-
-Pure bash, compatible with macOS (bash 3) and Linux (bash 4+). No external dependencies.
-
-## Strategy Tips
-
-- **Global plugins** — Only keep skills used in every project (workflow, debugging)
-- **Project-level plugins** — Move domain plugins to `.claude/settings.json` in specific repos
-- **Pipeline skills** — Skills forming a pipeline (scriptwriter → storyboard → animator) may share keywords but have different roles — don't merge blindly
-
-## Hook Integration (Optional)
-
-Auto-remind before skill installs. Add to `~/.claude/settings.json`:
-
-```json
-{
-  "hooks": {
-    "PostToolUse": [
-      {
-        "matcher": "Bash",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "if echo \"$CLAUDE_TOOL_INPUT\" | grep -qE 'npx skills (add|remove|update)|skills add|skills remove'; then echo '[user-prompt-submit-hook] Run skill-hygiene duplicate check before proceeding.'; fi"
-          }
-        ]
-      }
-    ]
-  }
-}
-```
 
 ## License
 
